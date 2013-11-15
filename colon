@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ x"$1" = x"-v" ]; then
+	:
+fi
+
+echo "in script..."

@@ -1,0 +1,11 @@
+#!/bin/ksh
+
+eval $(ls -A | awk '{printf "FILES[%d]='\''%s'\''\n",NR-1,$0}')
+
+#echo ${FILES[*]}
+for elem in "${FILES[@]}"
+do
+	if [ -d "$elem" ]; then chmod 700 "$elem";
+        else chmod 600 "$elem";
+	fi
+done

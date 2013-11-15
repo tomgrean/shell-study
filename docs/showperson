@@ -1,0 +1,24 @@
+#!/bin/sh
+
+PATH=/bin:/usr/bin
+
+# check that a string is given
+if [ $# -lt 1 ]; then
+	echo "USAGE: `basename $0` name"
+	exit 1
+fi
+
+# check that the address book exists
+MYADDRESSBOOK="$HOME/addressbook"
+if [ ! -f "$MYADDRESSBOOK" ]; then
+	echo "ERROR: $MYADDRESSBOOK does not exist, or is not a file" >&2
+	exit 1
+fi
+
+# get all matches and format them
+grep -i "$1" "$MYADDRESSBOOK"|
+	awk -F: '{
+		printf "%-10s %s\n%-10s %s\n%-10s %s\n%-10s %s\n\n",\
+			"Account:",$1,"Name:",$2,"Email:",$3,"Phone:",$4;
+	}'
+

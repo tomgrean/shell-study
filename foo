@@ -1,0 +1,19 @@
+#!/bin/ksh
+
+fuuu(){
+	echo "$0 0 in function fuuu"
+	echo "$@ @ in function fuuu"
+	echo "$# # in function fuuu"
+	echo "$1 1 in function fuuu"
+	return 30
+}
+
+
+echo "$0 0 in script $0"
+echo "$@ @ in script $0"
+echo "$# # in script $0"
+echo "$1 1 in script $0"
+
+fuuu a b cd "ef ghi" jkl
+echo $?
+

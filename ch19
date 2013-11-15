@@ -1,0 +1,38 @@
+#!/bin/ksh -x
+
+AlarmHandler() {
+	set -x
+	echo "Got SIGALRM, cmd took too long."
+	kill ${CHPROCIDS:-$!}
+	if [ $? -eq 0 ]; then
+		echo "Sub Process killed."
+	fi
+	exit 14
+}
+
+SetTimer() {
+	set -x
+	DEF_TOUT=${1:-10}
+	if [ $DEF_TOUT -gt 0 ]; then
+		sleep $DEF_TOUT && kill -ALRM $$ &
+		#CHPROCIDS="$CHPROCIDS $!"
+		TIMERPROC=$!
+	fi
+}
+
+UnsetTimer() {
+	echo "unset timer $TIMERPROC"
+	kill $TIMERPROC
+}
+
+
+trap AlarmHandler ALRM
+SetTimer 10
+ds &
+CHPROCIDS="$CHPROCIDS $!"
+wait $!
+UnsetTimer
+
+echo "All Done."
+
+

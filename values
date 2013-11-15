@@ -1,0 +1,6 @@
+#!/bin/sh
+
+a="hahas	byby
+joajiw@*\#oe aowea$a#wof"
+
+echo "value=$a"

@@ -1,0 +1,10 @@
+#!/bin/ksh
+
+case ${1:-' '} in
+	'emacs') set -o emacs;
+		echo "emacs mode on";
+		;;
+	*) set -o vi;
+		echo "vi mode on";
+		;;
+esac

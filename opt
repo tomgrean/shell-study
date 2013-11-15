@@ -1,0 +1,16 @@
+#!/bin/ksh
+
+while getopts f:o:v OPT ; do
+	case "$OPT" in
+	f) echo fffff $OPTARG
+	;;
+	o) echo ooooo $OPTARG
+	;;
+	v) echo vvvvvvvvvvvv
+	;;
+	'?') echo '???????????????????'
+	exit 1;;
+	esac
+done
+
+echo $OPTIND

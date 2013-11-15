@@ -1,0 +1,9 @@
+#!/bin/ksh
+
+echo "env var PATH=$PATH"
+
+echo "user define AFRUIT=$AFRUIT"
+
+export MYVAR=bbb
+
+echo "env var MYVAR=$MYVAR"

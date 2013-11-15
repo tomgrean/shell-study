@@ -1,0 +1,24 @@
+#!/bin/ksh
+
+Usage="Usage $0 {-l file}|{-c|-u directory}"
+
+if getopts ':l:c:u:' OPTION; then
+
+    case "$OPTION" in
+    	l) TARGS=" -tvf $OPTARG"
+    	    [ -f "$OPTARG" ] || { echo "$Usage"; exit 1; }
+    	;;
+    	c) TARGS=" -cvf ${OPTARG}.tar $OPTARG"
+    	    [ -e "${OPTARG}.tar" ] && { echo "File ${OPTARG}.tar exists.
+    [Enter] to continue,[Ctrl+c] to abort."; read; }
+    	;;
+    	u) TARGS=" -uvf ${OPTARG}.tar $OPTARG" ;;
+    	*) echo "$Usage"
+    	exit 2;;
+    esac
+    
+    tar $TARGS
+else
+	echo "$Usage"
+	exit 3
+fi

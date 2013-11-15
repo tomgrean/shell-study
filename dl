@@ -1,0 +1,6 @@
+#!/bin/ksh93
+
+while :; do
+	cal > /dev/null
+	sleep 7
+done

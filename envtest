@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo "Environment Variable PATH is $PATH"
+echo "User Define Variable AFRUIT is $AFRUIT"
+
+myvar="local local"
+export myvar
+echo "export myvar is $myvar"
+

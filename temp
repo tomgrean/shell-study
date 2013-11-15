@@ -1,0 +1,18 @@
+#!/bin/ksh
+
+. shcomm.sh
+
+#printERROR "sth BAD"
+#printWARNING "sth warning"
+#printUSAGE "sth useful"
+
+#promptYESNO "sth to choose" n
+#echo $YESNO
+#promptRESPONSE 'sth to input' ~
+#echo $RESPONSE
+
+#getSpaceFree .
+#getSpaceUsed .
+
+#getPID ksh
+getUID

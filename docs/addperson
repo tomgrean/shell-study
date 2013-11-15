@@ -1,0 +1,50 @@
+#!/bin/sh
+
+PATH=/bin:/usr/bin
+. ./shcomm.sh
+
+MYADDRESSBOOK="$HOME/addressbook"
+ACCOUNT=''
+NAME=''
+EMAIL=''
+PHONE=''
+
+# function to remove the ":" from user input
+remove_colon() { echo "$@" | tr ':' ' ' ; }
+
+if [ $# -lt 1 ]; then
+	# this is interactive mode
+	stty erase '^h'
+	promptRESPONSE "Account: "
+	ACCOUNT="$RESPONSE"
+	promptRESPONSE "Name:    "
+	NAME="$RESPONSE"
+	printf "Email:   ? "
+	read EMAIL
+	printf "Phone:   ? "
+	read PHONE
+else
+	# this is noninteractive mode
+	USAGE="`basename $0` [ -a account ][ -n name ][ -e email ][ -p phone ]"
+	# scan the arguements
+	while getopts 'a:n:e:p:h' OPTION; do
+		case "$OPTION" in
+			a) ACCOUNT="$OPTARG" ;;
+			n) NAME="$OPTARG" ;;
+			e) EMAIL="$OPTARG" ;;
+			p) PHONE="$OPTARG" ;;
+			\?|h) printUSAGE "$USAGE" ; exit 1;;
+		esac
+	done
+	if [ -z "$ACCOUNT" -o -z "$NAME" ]; then
+		printERROR "Account and Name can not be empty."
+		exit 1
+	fi
+fi
+
+ACCOUNT="`remove_colon $ACCOUNT`"
+NAME="`remove_colon $NAME`"
+EMAIL="`remove_colon $EMAIL`"
+PHONE="`remove_colon $PHONE`"
+echo "$ACCOUNT:$NAME:$EMAIL:$PHONE" >> "$MYADDRESSBOOK"
+

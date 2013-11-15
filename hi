@@ -1,0 +1,5 @@
+#!/bin/ksh
+
+echo "$(ls -1|awk '{printf "FILES[%d]=%s\n",NR,$0}')"
+
+echo 'set -A FILES '"$(ls -1|awk '{printf "'\''%s'\'' ",$0}')"

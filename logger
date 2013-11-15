@@ -1,0 +1,10 @@
+#!/bin/ksh
+
+#[ -z "$1" ] && exit 1
+
+x=0
+while ((x<10)); do
+	echo "$((RANDOM % 5 + 10)) $((RANDOM % 5 + 10))" #>> "$1"
+	((x=x+1))
+	sleep 1
+done &

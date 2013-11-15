@@ -1,0 +1,15 @@
+#!/bin/ksh
+
+echo "\$# is $#"
+echo "\$! is $!"
+echo "\$0 is $0"
+echo "\$@ is $@"
+echo "\$* is $*"
+
+for elem in "$@"; do
+	echo "in @: $elem"
+done
+
+for elem in "$*"; do
+	echo "in *: $elem"
+done

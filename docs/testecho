@@ -1,0 +1,13 @@
+#!/bin/sh
+
+_ECHO='echo'
+
+if [ x"`echo -e t`" != x"-e t" ]; then
+        echo 'with -e'
+        _ECHO='echo -e'
+else
+        echo 'without -e'
+fi
+
+$_ECHO "$PWD "
+

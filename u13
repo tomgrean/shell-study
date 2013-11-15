@@ -1,0 +1,17 @@
+#!/bin/ksh
+printf "Please specify a file: "
+read FILE
+
+[ -r "$FILE" ] || { echo "[$FILE]: invalid file."; exit 3; }
+
+exec 5<&0 <"$FILE" 6>"${FILE}_a" 7>"${FILE}_b"
+
+while read line; do
+	case "$line" in
+		\#*) echo "$line" >&6 ;;
+		*) echo "$line" >&7 ;;
+	esac
+done
+
+exec 0<&5 5<&- 6>&- 7>&-
+

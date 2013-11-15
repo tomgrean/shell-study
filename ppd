@@ -1,0 +1,86 @@
+#!/bin/ksh
+
+dirs() {
+	#save IFS, then set it to : to access the
+	# items in _DIR_STACK individually
+	OLDIFS="$IFS"
+	IFS=":"
+
+	output='-e'
+	if [ x"`echo -e 'a'`" = x'-e a' ]; then
+		output=''
+	fi
+
+	case "${PWD}" in
+		${HOME}*)
+			echo $output "~${PWD#$HOME} \c" ;;
+		*)
+			echo $output "$PWD \c" ;;
+	esac
+	for i in $_DIR_STACK; do
+		case "$i" in
+			${HOME}*) i="~${i#$HOME}";;
+		esac
+		echo $output "$i \c"
+	done
+
+	#add now line
+	echo
+	# restore IFS
+	IFS="$OLDIFS"
+	unset OLDIFS output
+}
+pushd() {
+	typeset REQ="$1"
+	typeset OLD_PWD="$PWD"
+
+	if [ -z "$REQ" ]; then
+		REQ=${_DIR_STACK%%:*}
+		if [ -z "$REQ" ]; then
+			echo "pushd: No other directory"
+			return 1
+		fi
+		if cd "$REQ" >/dev/null 2>&1; then
+			_DIR_STACK="${OLD_PWD}${_DIR_STACK#$REQ}"
+			dirs
+			return 0
+		else
+			echo "$REQ: Error entering directory" >&2
+			return 1
+		fi
+	fi
+
+	if [ -d "$REQ" ] && cd "$REQ" >/dev/null 2>&1; then
+		if [ -z "$_DIR_STACK" ]; then
+			_DIR_STACK="$OLD_PWD"
+			export _DIR_STACK
+		else
+			_DIR_STACK="$OLD_PWD:$_DIR_STACK"
+		fi
+		dirs
+	else
+		echo "$REQ: Error entering directory" >&2
+		return 1
+	fi
+}
+
+popd() {
+	typeset POPD=${_DIR_STACK%%:*}
+
+	if [ -z "$POPD" ]; then
+		echo "popd: Directory stack empty" >&2
+		return 1
+	fi
+	if [ -d "$POPD" ] && cd "$POPD" > /dev/null 2>&1; then
+		if [ "$POPD" = "$_DIR_STACK" ]; then
+			_DIR_STACK=""
+		else
+			_DIR_STACK="${_DIR_STACK#*:}"
+		fi
+		dirs
+	else
+		echo "$POPD: Error entering directory" >&2
+		return 1
+	fi
+}
+

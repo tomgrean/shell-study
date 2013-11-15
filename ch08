@@ -1,0 +1,19 @@
+#!/bin/ksh
+
+USAGE="usage:
+	$0 destFile.tar.gz [ srcDir ]"
+
+: ${@:?"$USAGE"}
+
+if [ -e "$1" ]
+then
+	echo "$1 exists!"
+	echo "$USAGE"
+	exit 1
+fi
+
+SRCBASE=${2:-'../lss'}
+SRC=$(find "$SRCBASE" -name '*.[ch]')
+
+#echo $SRC
+tar cf - $SRC | gzip - > "$1"

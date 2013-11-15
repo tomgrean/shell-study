@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+	echo "USAGE: `basename $0` name"
+	exit 1
+fi
+
+MYADDRESSBOOK="$HOME/addressbook"
+if [ ! -r "$MYADDRESSBOOK" ]; then
+	echo "ERROR: $YADDRESSBOOK does not exist, or is not a file" >&2
+	exit 1
+fi
+
+grep -i "$1" $MYADDRESSBOOK | awk -F: '{
+	printf "%-10s %s\n%-10s %s\n%-10s %s\n%-10s %s\n\n",\
+		"Account:",$1,"Name:",$2,"Email:",$3,"Phone:",$4;
+	}'
+

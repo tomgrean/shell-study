@@ -1,0 +1,13 @@
+#!/bin/ksh
+x=0
+alm() {
+	let x=x+1
+	echo $x"haha";
+	sleep 1
+	/bin/kill -ALRM $$
+}
+trap 'alm' ALRM
+
+cal &
+kill -ALRM $$
+

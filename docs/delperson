@@ -1,0 +1,78 @@
+#!/bin/sh
+
+PATH=/bin:/usr/bin
+export PATH
+
+# import shell library
+. ./shcomm.sh
+# check that a name is given
+if [ $# -lt 1 ]; then
+	printUSAGE "`basename $0` name"
+fi
+
+# check that the address book exists
+
+MYADDRESSBOOK="$HOME/addressbook"
+if [ ! -f "$MYADDRESSBOOK" ]; then
+	printERROR "$MYADDRESSBOOK does not exist, or is not a file."
+	exit 1
+fi
+
+# initialize the valiables holding the location of the temporay files
+TMPF1=/tmp/backup.$$
+TMPF2=/tmp/deltmp.$$
+LINEDEL=''
+
+# function to clean up temporary files
+doCleanup() { rm "$TMPF1" "$TMPF2" 2> /dev/null;LINEDEL=''; }
+
+# function to exit if update failed
+Failed() {
+	if [ "$1" -ne 0 ]; then
+		shift
+		printERROR "$@"
+		doCleanup
+		exit 1
+	fi
+}
+
+# make a copy of the address book for updating
+cp "$MYADDRESSBOOK" "$TMPF1" 2> /dev/null
+Failed $? "Could not make a backup of the address book."
+
+# get a list of all matching lines from the address book copy
+# continue if one or more matches were found.
+
+grep -in "$1" "$TMPF1" > "$TMPF2" 2> /dev/null
+Failed $? "No matches found."
+
+# Prompt the user for each entry that was found
+
+exec 5< "$TMPF2"
+while read todel <&5; do
+	# display each line.
+	echo "$todel" | awk -F: '{
+		printf "%-10s %s\n%-10s %s\n%-10s %s\n%-10s %s\n\n",\
+			"Account:",$2,"Name:",$3,"Email:",$4,"Phone:",$5;
+	}'
+	
+	# prompt for each line, if yes try to remove the line
+
+	promptYESNO "Delete this entry" "n"
+	if [ "$YESNO" = 'y' ]; then
+		# add the line to LINEDEL
+		LINEDEL="$LINEDEL -e $(echo "$todel"|awk -F: '{print $1;}')d"
+	fi
+done
+exec 5<&-
+
+# deleting the lines
+if [ -n "$LINEDEL" ]; then
+	#echo  $LINEDEL "$TMPF1" '>' "$MYADDRESSBOOK" '2> /dev/null'
+	cp "$MYADDRESSBOOK" "${MYADDRESSBOOK}~"
+	sed $LINEDEL "$TMPF1" > "$MYADDRESSBOOK"  2> /dev/null
+	Failed $? "Update the address book failed."
+fi
+# delete temp file.
+doCleanup
+

@@ -1,0 +1,133 @@
+#!/bin/sh
+
+PATH=/bin:/usr/bin
+export PATH
+
+. ~/bin/shcomm.sh
+
+# global variable
+USAGE="[-r] [-j|-z|-Z] dir backup_file
+	(default) do backup from 'dir' to 'backup_file'
+	-r        do restore from 'backup_file' 'dir'
+	-h        show this help
+	-j        use bzip2 compression
+	-z        use gzip compression
+	-Z        use .Z compression"
+ACTION='b'
+COMPRESS=''
+
+# add to COMPRESS option
+setCompress() { [ -z "$COMPRESS" ] && COMPRESS="$1" || return 1; }
+
+# parse all options
+OPTIND=1
+while :; do
+	if getopts ':rhjzZ' OPTION; then
+		case "$OPTION" in
+			r) ACTION='r';;
+			h) printUSAGE "$USAGE" ;;
+			z) setCompress 'z' || printUSAGE "-z and -$COMPRESS: duplicated.";;
+			Z) setCompress 'Z' || printUSAGE "-Z and -$COMPRESS: duplicated.";;
+			j) setCompress 'j' || printUSAGE "-j and -$COMPRESS: duplicated.";;
+			*) printERROR "$OPTARG: Invalid option. use -h for help."
+			exit 1;;
+		esac
+	else
+		if [ $OPTIND -gt 1 ]; then
+			shift $((OPTIND - 1))
+			OPTIND=1
+		fi
+		if [ -z "$SRCDIR" -a -n "$1" ]; then
+			SRCDIR="$1"
+			shift
+		elif [ -z "$BACKUP" -a -n "$1" ]; then
+			BACKUP="$1"
+			shift
+		else
+			[ -z "$1" ] &&
+			break ||
+			{ printERROR "$1: Invalid arguement. Use -h for help."
+			exit 1 ; }
+		fi
+	fi
+done
+
+# do simple check
+if [ -z "$SRCDIR" ]; then
+	printERROR "no dir, use -h for help."
+	exit 1
+fi
+if [ -z "$BACKUP" ]; then
+	printERROR "no backup_file, use -h for help."
+	exit 1
+fi
+
+# split up the name into dirname and basename
+# for easier processing later on
+SRCDIR_P="`dirname "$SRCDIR"`"
+SRCDIR_C="`basename "$SRCDIR"`"
+
+BACKUPDIR="`dirname "$BACKUP"`"
+BACKUPNAME="`basename "$BACKUP"`"
+
+# do some more check
+if [ "$ACTION" = 'b' ]; then
+	# check if backup_file exists
+	if [ -e "$BACKUP" ]; then
+		printERROR "file $BACKUPNAME already exists."
+		exit 1
+	fi
+	
+	# check BACKUPDIR
+	if [ ! -d "$BACKUPDIR" ]; then
+		printERROR "directory $BACKUPDIR does not exist."
+		exit 1
+	fi
+elif [ "$ACTION" = r ];then
+	# check backup_file
+	if [ ! -f "$BACKUP" ]; then
+		printERROR "file $BACKUPFILE does not exist."
+		exit 1
+	fi
+fi
+
+# check SRCDIR
+if [ ! -d "$SRCDIR" ]; then
+	printERROR "The source $SRCDIR is not a directory, or does not exist."
+	exit 1
+fi
+
+# change to absolute path
+SRCDIR_P="`( cd "$SRCDIR_P"; pwd; )`"
+BACKUPDIR="`( cd "$BACKUPDIR"; pwd; )`"
+
+# set COMPRESS program
+case "$COMPRESS" in
+	j) COMP="bzip2"; DECOMP='bzip2 -dc';;
+	z) COMP="gzip"; DECOMP='gzip -dc';;
+	Z) COMP="compress"; DECOMP='zcat';;
+esac
+
+# begin backup or restore
+case "$ACTION" in
+	b) cd "$SRCDIR_P" > /dev/null
+	if [ -z "$COMPRESS" ]; then
+		tar -cpf "${BACKUPDIR}/$BACKUPNAME" "$SRCDIR_C"
+	else
+		tar -cpf - "$SRCDIR_C"|$COMP > "${BACKUPDIR}/$BACKUPNAME"
+	fi
+	;;
+	r) cd "$SRCDIR" > /dev/null
+	if [ -z "$COMPRESS" ]; then
+		tar -xpf "${BACKUPDIR}/$BACKUPNAME"
+	else
+		$DECOMP "${BACKUPDIR}/$BACKUPNAME" | tar -xpf -
+	fi
+	;;
+esac
+
+if [ $? -ne 0 ]; then
+	printERROR "Failed to backup/restore ... "
+	exit 2
+fi
+

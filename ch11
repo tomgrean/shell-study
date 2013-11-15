@@ -1,0 +1,40 @@
+#!/bin/ksh
+
+set -n
+BASE=${1:-100}
+LENGTH=${2:-50}
+TIMES=${3:-10}
+select CMD in "Newgame" "Exit" "Help"; do
+  case "$CMD" in
+    "Newgame") 
+    i=1
+    num=$((RANDOM % LENGTH + BASE))
+    
+    while [ $i -le $TIMES ]; do
+    printf "Enter a number between %d and %d, (%d times left): " \
+    	$BASE $((BASE + LENGTH)) $((TIMES - i))
+    
+    read user
+    
+    if [ "$user" -lt "$num" ]; then
+    	echo "Too small"
+    elif [ "$user" -gt "$num" ]; then
+    	echo "Too big"
+    else
+    	echo "Congratulations. You're right, $i times used"
+    	break
+    fi
+    
+    ((i=i+1))
+    done
+    
+    [ "$i" -gt "$TIMES" ] && echo "Sorry, you lose"
+  ;;
+  "Exit") break
+  ;;
+  *)
+     echo "usage: $0 [ startnum length times_limited ]"
+  ;;
+  esac
+done
+

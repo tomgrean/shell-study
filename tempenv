@@ -1,0 +1,9 @@
+#!/bin/ksh
+
+echo "variable \$x=$x"
+echo '======================'
+
+
+for elem in "$@"; do
+	echo $elem
+done

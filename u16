@@ -1,0 +1,37 @@
+#!/bin/ksh
+
+USAGE="Usage: ${0##*/} [ -f ] name file_list ..
+	-f: search for function"
+FILENAME=''
+NAME=''
+FUNC=0
+i=0
+
+for option in "$@"; do
+	case "$option" in
+		-f) FUNC=1;;
+		*)
+			if [ -z "$NAME" ]; then
+				NAME="$option"
+			else
+				FILENAME[$i]="$option"
+				let i=i+1
+			fi
+		;;
+	esac
+done
+
+if [ -z "$NAME" ] || [ $i -lt 1 ]; then
+	echo "$USAGE"
+	exit 1;
+fi
+
+for afile in "${FILENAME[@]}"; do
+	echo "$afile:"
+	if [ "$FUNC" -gt 0 ]; then
+		sed "{/^.*$NAME[ \t]*([^;]*$/,/^}/!d;=;}" "$afile" | sed 'N;s/\n/:/'
+	else
+		sed "{/[ \t,*]$NAME[] \t0-9[]*[= \t,;]/!d;=;}" "$afile" | sed 'N;s/\n/:/'
+	fi
+done
+

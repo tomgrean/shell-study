@@ -1,0 +1,22 @@
+#!/bin/ksh
+
+function move {
+	echo "move $1 --> $2 "
+}
+
+# $1: disk_no   $2: src $3: temp   $4: dest
+function hanoi {
+	typeset disk=$1
+	typeset src=$2
+	typeset temp=$3
+	typeset dest=$4
+	if [ "$disk" -lt 1 ]; then
+		return
+	else
+		((disk=disk-1))
+		hanoi $disk $src $dest $temp
+		move  $src $dest
+		hanoi $disk $temp $src $dest
+	fi
+}
+

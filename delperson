@@ -1,0 +1,60 @@
+#!/bin/sh
+
+. ~/bin/shcomm.sh
+
+if [ $# -lt 1 ]; then
+	printUSAGE "`basename $0` name"
+fi
+
+MYADDRESSBOOK="$HOME/addressbook"
+
+if [ ! -f "$MYADDRESSBOOK" ]; then
+	printERROR "$MYADDRESSBOOK does not exist, or is not a file."
+	exit 1
+fi
+
+TMPF1=/tmp/backup.$$
+TMPF2=/tmp/deltmp.$$
+LINEDEL=''
+
+doCleanup() {
+	rm "$TMPF1" "$TMPF2" 2> /dev/null
+	LINEDEL=''
+}
+
+Failed() {
+	if [ "$1" -ne 0 ]; then
+		shift
+		printERROR "$@"
+		doCleanup
+		exit 1
+	fi
+}
+
+
+cp "$MYADDRESSBOOK" "$TMPF1" 2> /dev/null
+Failed $? "Could not make a backup of the address book."
+
+grep -in "$1" "$TMPF1" > "$TMPF2" 2> /dev/null
+Failed $? "No matches found."
+
+exec 5< "$TMPF2"
+while read todel <&5; do
+	echo "$todel" | awk -F: '{
+		printf "%-10s %s\n%-10s %s\n%-10s %s\n%-10s %s\n\n",\
+			"Accout:",$2,"Name:",$3,"Email:",$4,"Phone:",$5;
+		}'
+	promptYESNO "Delete this entry" "n"
+	if [ "$YESNO" = 'y' ]; then
+		LINEDEL="$LINEDEL -e `echo "$todel" | awk -F: '{print $1;}'`d"
+	fi
+done
+exec 5<&-
+
+if [ -n "$LINEDEL" ]; then
+	cp "$MYADDRESSBOOK" "${MYADDRESSBOOK}~" 
+	sed $LINEDEL "$TMPF1" > "$MYADDRESSBOOK" 2>/dev/null
+	Failed $? "Update the address book failed."
+fi
+
+doCleanup

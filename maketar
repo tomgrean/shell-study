@@ -1,0 +1,17 @@
+#!/bin/ksh
+
+if [ -z "$1" ]; then
+	echo "Usage $0 file|directory"
+	exit 1
+fi
+
+case "$0" in
+	*listtar) TARGS=" -tvf $1";;
+	*maketar) TARGS=" -cvf ${1}.tar $1";;
+	*updatetar) TARGS=" -uvf ${1}.tar $1" ;;
+	*) echo "Usage: $0 is an invalid command name,
+only 'listtar','maketar','updatetar' is accepted."
+	exit 2;;
+esac
+
+tar $TARGS

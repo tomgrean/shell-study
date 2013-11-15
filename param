@@ -1,0 +1,18 @@
+#!/bin/ksh
+
+set -A dd jan feb "mar sep" dec
+#dd=(jan feb "mar sep" dec)
+
+echo "${dd[*]}"
+echo "${dd[@]}"
+echo "parameters: * and @"
+echo "$*"
+echo "$@"
+
+for xxx in "${dd[*]}"
+    do echo $xxx
+done
+echo "showing \$\$"
+for xxx in "$@"
+    do echo $xxx
+done

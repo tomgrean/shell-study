@@ -1,0 +1,42 @@
+#!/bin/sh
+
+Failed() {
+	if [ "$1" -ne 0 ]; then
+		echo "Failed. Exiting."; exit 1;
+	fi
+	echo "Done."
+}
+
+PreBackup() {
+	if [ -e backup ];then
+		echo "Deleting old backups, please wait ... \c"
+		rm -r backup > /dev/null 2>&1
+		Failed $?
+	fi
+}
+Debug() {
+	if [ "$DEBUG" = 'true' ]; then
+		if [ "$1" = 'on' -o "$1" = 'ON' ]; then
+			set -x
+		else
+			set +x
+		fi
+	fi
+}
+
+
+echo "Make backup (y/n)? \c"
+read RESPONSE
+case $RESPONSE in
+	[nN]|[Nn][Oo])
+		echo "Backup Skipped.";;
+	[yY]|[Yy][Ee][Ss]|*)
+		Debug on
+		PreBackup
+		echo "Making backup, please wait ...\c"
+		cp -r docs backup
+		Failed $?
+		Debug off
+		;;
+esac
+

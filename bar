@@ -1,0 +1,46 @@
+#!/bin/ksh
+
+BASENUM=${1:-100}
+LENGTH=${2:-50}
+TIMES=${3:-10}
+
+#for elem in "$BASENUM" "$LENGTH" "$TIMES"; do
+#       [ -n "$(echo "$elem"|sed 's/^[0-9][0-9]*$//g')" ] && {
+#               echo "Wrong argument: $elem"
+#               exit 1
+#       }
+#done
+echo "parameters: $@"
+
+i=${4:-1}
+num=${5:-$(($RANDOM % $LENGTH + $BASENUM))}
+
+echo $num "in $$"
+printf "Enter a number between %d and %d, (%d times left): " \
+        $BASENUM $((BASENUM+LENGTH)) $((TIMES - i))
+
+read user
+
+#[ -z "$user" -o -n "$(echo "$user"|sed 's/^[0-9][0-9]*$//g')" ] && {
+#       echo "Wrong input!"
+#       ((--i))
+#}
+
+if [ "$user" -lt "$num" ]; then
+        echo "Too small."
+elif [ "$user" -gt "$num" ]; then
+        echo "Too big."
+else
+        echo "Congratulations. You're right. $i times used."
+        exit 0
+fi
+
+if (( $i >= $TIMES )); then
+        echo "Sorry, you fail."
+        exit 2;
+fi
+
+(( ++i ))
+echo "______________$i"
+"$0" "$BASENUM" "$LENGTH" "$TIMES" "$i" "$num"
+

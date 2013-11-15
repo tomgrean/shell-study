@@ -1,0 +1,11 @@
+#!/bin/sh
+
+_ECHO=''
+
+if [ x"`echo -e t`" = x"t" ]; then
+	_ECHO='-e'
+fi
+
+ECHO() { echo $_ECHO "$@"; }
+
+ECHO "aowei\n\n\tseifjosie"

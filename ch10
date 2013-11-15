@@ -1,0 +1,29 @@
+#!/bin/ksh
+
+BASE=${1:-100}
+LENGTH=${2:-50}
+TIMES=${3:-10}
+i=${4:-1}
+num=${5:-$((RANDOM % LENGTH + BASE))}
+
+
+printf "Enter a number between %d and %d, (%d times left): " \
+	$BASE $((BASE + LENGTH)) $((TIMES - i))
+
+read user
+
+if [ "$user" -lt "$num" ]; then
+	echo "Too small"
+elif [ "$user" -gt "$num" ]; then
+	echo "Too big"
+else
+	echo "Congratulations. You're right, $i times used"
+	exit 0
+fi
+
+if ((i >= TIMES)); then
+	echo "Sorry, you lose"
+	exit 1
+fi
+
+"$0" "$BASE" "$LENGTH" "$TIMES" "$((i+1))" "$num"

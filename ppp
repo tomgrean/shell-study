@@ -1,0 +1,7 @@
+#!/bin/ksh
+
+exec 0<~/files
+
+while read LINES ; do
+	echo "readed___$LINES"
+done

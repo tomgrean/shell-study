@@ -1,0 +1,65 @@
+##
+function dirs {
+	typeset OLDIFS="$IFS"
+	IFS=":"
+	
+	printf "$PWD "
+	for i in $_DIR_STACK ; do
+		printf "$i "
+	done
+	#add new line
+	echo
+
+	IFS="$OLDIFS"
+}
+function pushd {
+	typeset OLDPWD="$PWD"
+	typeset REQ="$1"
+	
+	if [ -z "$REQ" ]; then
+		REQ=${_DIR_STACK%%:*}
+		if [ -z "$REQ" ]; then
+			echo "pushd: No other directory" >&2
+			return 1
+		fi
+		if cd "$REQ" > /dev/null 2>&1 ; then
+			_DIR_STACK="${OLDPWD}${_DIR_STACK#$REQ}"
+			dirs
+			return 0
+		else
+			echo "$REQ: Error entering directory" >&2
+			return 1
+		fi
+	fi
+	if [ -d "$REQ" ] && cd "$REQ" > /dev/null 2>&1; then
+		if [ -z "$_DIR_STACK" ]; then
+			_DIR_STACK="$OLDPWD"
+			export _DIR_STACK
+		else
+			_DIR_STACK="$OLDPWD:$_DIR_STACK"
+		fi
+		dirs
+	else
+		echo "$REQ: Error entering directory" >&2
+		return 1
+	fi
+}
+function popd {
+	typeset POPD="${_DIR_STACK%%:*}"
+	if [ -z "$POPD" ]; then
+		echo "popd: directory stack empty" >&2
+		return 1
+	fi
+	if [ -d "$POPD" ] && cd "$POPD" > /dev/null 2>&1; then
+		if [ "$POPD" = "$_DIR_STACK" ]; then
+			_DIR_STACK=''
+		else
+			_DIR_STACK="${_DIR_STACK#*:}"
+		fi
+		dirs
+	else
+		echo "$POPD: error entering directory" >&2
+		return 1
+	fi
+}
+

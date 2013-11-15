@@ -1,0 +1,25 @@
+#!/bin/ksh
+
+Usage="Usage $0 {-l file}|{-c|-u directory}"
+if [ $# -lt 2 ]; then
+	echo "$Usage"
+	exit 1
+fi
+
+OPTION="$1"
+shift 1
+
+case "$OPTION" in
+	-l) TARGS=" -tvf $1"
+	    [ -f "$1" ] || { echo "$Usage"; exit 1; }
+	;;
+	-c) TARGS=" -cvf ${1}.tar $1"
+	    [ -e "${1}.tar" ] && { echo "File ${1}.tar exists.
+[Enter] to continue,[Ctrl+c] to abort."; read; }
+	;;
+	-u) TARGS=" -uvf ${1}.tar $1" ;;
+	*) echo "$Usage"
+	exit 2;;
+esac
+
+tar $TARGS
